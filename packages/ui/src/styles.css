@@ -180,6 +180,18 @@ input, select, textarea {
   padding: 10px 12px;
   border-bottom: 1px solid var(--border);
 }
+.toolbar .btn,
+.toolbar .segmented,
+.toolbar .check,
+.toolbar select,
+.toolbar input:not([type="checkbox"]) {
+  height: 30px;
+}
+.toolbar select,
+.toolbar input:not([type="checkbox"]) {
+  padding-top: 0;
+  padding-bottom: 0;
+}
 .segmented { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; height: 30px; }
 .segmented button { padding: 0 10px; border-radius: 0; color: var(--muted); }
 .segmented button[aria-selected="true"] { background: var(--selection); color: var(--fg); }
