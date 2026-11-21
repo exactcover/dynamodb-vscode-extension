@@ -2,6 +2,7 @@ import { ConnectionBook, ServiceCache, createDispatcher, type Host } from "@dyna
 import { app, BrowserWindow, clipboard, dialog, ipcMain } from "electron";
 import fs from "node:fs";
 import path from "node:path";
+import { installAppMenu } from "./menu";
 import { ElectronConnectionRepository, secretsAreEncrypted } from "./store";
 
 declare const __dirname: string;
@@ -81,6 +82,7 @@ app.on("second-instance", () => {
 if (hasLock) {
   void (async () => {
     await app.whenReady();
+    installAppMenu();
     const dispatch = createDispatcher(host(), new ServiceCache());
     ipcMain.handle("dynamo:request", async (_event, message: { method?: string; params?: unknown }) => {
       if (!message || typeof message.method !== "string") throw new Error("Invalid request.");
