@@ -1,0 +1,23 @@
+{
+  "name": "@dynamodb-client/desktop",
+  "version": "0.1.0",
+  "private": true,
+  "author": "DynamoDB Client",
+  "description": "Desktop DynamoDB client for macOS and Linux.",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "dev": "bun scripts/dev.ts",
+    "package": "bun run build && electron-builder --config electron-builder.yml",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@dynamodb-client/core": "workspace:*"
+  },
+  "devDependencies": {
+    "electron": "^45.4.1",
+    "electron-builder": "^26.18.0",
+    "esbuild": "^0.28.2",
+    "typescript": "^7.0.2"
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "name": "dynamodb-client",
+  "displayName": "DynamoDB Client",
+  "description": "Browse, query, search, and edit DynamoDB items without leaving VS Code.",
+  "version": "0.1.0",
+  "publisher": "local",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": ["Other"],
+  "keywords": ["dynamodb", "aws", "nosql"],
+  "main": "./dist/extension.js",
+  "capabilities": {
+    "virtualWorkspaces": false,
+    "untrustedWorkspaces": {
+      "supported": true
+    }
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "dynamodb.open",
+        "title": "DynamoDB: Open Client",
+        "icon": "$(database)"
+      },
+      {
+        "command": "dynamodb.addConnection",
+        "title": "DynamoDB: Add Connection",
+        "icon": "$(add)"
+      },
+      {
+        "command": "dynamodb.refresh",
+        "title": "DynamoDB: Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "dynamodb.deleteConnection",
+        "title": "DynamoDB: Delete Connection",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "dynamodb.showLog",
+        "title": "DynamoDB: Show Log"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "dynamodb",
+          "title": "DynamoDB",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "dynamodb": [
+        {
+          "id": "dynamodb.connections",
+          "name": "Connections",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "dynamodb.connections",
+        "contents": "Connect to DynamoDB Local or AWS.\n[Add connection](command:dynamodb.addConnection)\n[Open client](command:dynamodb.open)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "dynamodb.open",
+          "when": "view == dynamodb.connections",
+          "group": "navigation"
+        },
+        {
+          "command": "dynamodb.addConnection",
+          "when": "view == dynamodb.connections",
+          "group": "navigation"
+        },
+        {
+          "command": "dynamodb.refresh",
+          "when": "view == dynamodb.connections",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "dynamodb.deleteConnection",
+          "when": "view == dynamodb.connections && viewItem == connection",
+          "group": "inline"
+        },
+        {
+          "command": "dynamodb.refresh",
+          "when": "view == dynamodb.connections && viewItem == connection"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "typecheck": "tsc --noEmit",
+    "vsce": "vsce package --no-dependencies --allow-missing-repository --out ../../release/dynamodb-client.vsix"
+  },
+  "devDependencies": {
+    "@dynamodb-client/core": "workspace:*",
+    "@types/vscode": "^1.146.0",
+    "@vscode/vsce": "^4.1.1",
+    "esbuild": "^0.28.2",
+    "typescript": "^7.0.2"
+  }
+}

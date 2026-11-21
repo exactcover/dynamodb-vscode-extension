@@ -1,0 +1,25 @@
+{
+  "name": "dynamodb-client",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "bun@1.4.5",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "test": "bun run --filter @dynamodb-client/protocol test && bun run --filter @dynamodb-client/core test",
+    "typecheck": "bun run --filter @dynamodb-client/protocol typecheck && bun run --filter @dynamodb-client/core typecheck && bun run --filter @dynamodb-client/ui typecheck && bun run --filter ./packages/vscode typecheck && bun run --filter ./packages/desktop typecheck",
+    "build": "bun run --filter @dynamodb-client/ui build && bun run --filter ./packages/vscode build && bun run --filter ./packages/desktop build",
+    "dev:desktop": "bun run --filter ./packages/desktop dev",
+    "package:vscode": "bun run --filter @dynamodb-client/ui build && bun run --filter ./packages/vscode build && bun run --filter ./packages/vscode vsce",
+    "package:desktop": "bun run --filter @dynamodb-client/ui build && bun run --filter ./packages/desktop package"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.1"
+  },
+  "engines": {
+    "node": "^22.12.0 || ^24.0.0 || >=26.0.0"
+  }
+}

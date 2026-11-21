@@ -1,0 +1,19 @@
+appId: dev.local.dynamodb-client
+productName: DynamoDB Client
+directories:
+  output: ../../release/desktop
+files:
+  - dist/**
+  - package.json
+asar: true
+linux:
+  target:
+    - AppImage
+    - deb
+  category: Development
+  maintainer: DynamoDB Client
+mac:
+  target:
+    - zip
+    - dmg
+  category: public.app-category.developer-tools

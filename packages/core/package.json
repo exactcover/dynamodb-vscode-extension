@@ -1,0 +1,19 @@
+{
+  "name": "@dynamodb-client/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1175.0",
+    "@aws-sdk/credential-provider-ini": "^3.973.31",
+    "@aws-sdk/credential-provider-node": "^3.972.98",
+    "@dynamodb-client/protocol": "workspace:*"
+  }
+}
