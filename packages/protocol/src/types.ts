@@ -136,11 +136,20 @@ export interface LocalIndexInput {
   nonKeyAttributes?: string[];
 }
 
+export interface GlobalIndexInput {
+  indexName: string;
+  partitionKey: { name: string; type: KeyAttributeType };
+  sortKey?: { name: string; type: KeyAttributeType };
+  projection: "ALL" | "KEYS_ONLY" | "INCLUDE";
+  nonKeyAttributes?: string[];
+}
+
 export interface CreateTableInput {
   tableName: string;
   partitionKey: { name: string; type: KeyAttributeType };
   sortKey?: { name: string; type: KeyAttributeType };
   localIndexes?: LocalIndexInput[];
+  globalIndexes?: GlobalIndexInput[];
 }
 
 export interface CreateIndexInput {

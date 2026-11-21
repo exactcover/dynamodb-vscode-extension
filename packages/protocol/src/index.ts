@@ -11,6 +11,7 @@ export type {
   ImportItemsResult,
   IndexDescription,
   ItemPage,
+  GlobalIndexInput,
   KeyAttributeType,
   LocalIndexInput,
   KeySchema,

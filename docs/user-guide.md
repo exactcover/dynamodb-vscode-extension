@@ -91,9 +91,9 @@ The **×** on a row deletes that item after you confirm. Check several rows and 
 
 ## Tables
 
-**+** next to Tables opens **Create table**. You set the table name, a partition key, and an optional sort key. With a sort key you can add up to five local secondary indexes. Each one uses the table partition key and its own sort key. Each key is String, Number, or Binary. The table is on-demand.
+**+** next to Tables opens **Create table**. You set the table name, one partition key, and an optional sort key. **Add global index** gives each extra key, such as `email`, its own partition key. With a sort key you can also add up to five local secondary indexes. Each local index uses the table partition key and its own sort key. Each key is String, Number, or Binary. The table is on-demand.
 
-**Definition**, on the line above the items, shows the status, billing mode, size, primary key, and every index. **Add index** creates a global secondary index on an attribute you already store. A local secondary index cannot be added after the table exists.
+**Definition**, on the line above the items, shows the status, billing mode, size, primary key, and every index. **Add index** creates another global secondary index on an attribute you already store. A local secondary index cannot be added after the table exists.
 
 Each table in the sidebar has a trash icon. It asks you to type the table name. That deletes the table and every item in it.
 
@@ -102,5 +102,5 @@ Each table in the sidebar has a trash icon. It asks you to type the table name. 
 - A page is 25, 50, or 100 items. **Load more** and **Keep scanning** continue from the last key.
 - Text search reads the table. Name an attribute when you know which field to search.
 - Import accepts up to 200 items and 5 MB. Export of the current page stops at 5 MB.
-- Create Table builds an on-demand table. With a sort key it can include up to five local secondary indexes. Add a global secondary index later from Definition. A local secondary index cannot be added after the table exists.
+- Create Table builds an on-demand table with one partition key, an optional sort key, up to twenty global secondary indexes, and up to five local secondary indexes when the table has a sort key. Definition can add a global secondary index later. A local secondary index cannot be added after the table exists.
 - Global secondary indexes do not support consistent reads.

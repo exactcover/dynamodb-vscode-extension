@@ -105,7 +105,7 @@ export function TableDefinitionDialog(props: {
       {adding ? (
         <section className="stack">
           <h3>New global secondary index</h3>
-          <p className="muted">A local secondary index is chosen in Create table. This adds a global secondary index. Items already stored are copied into it, which can take a while.</p>
+          <p className="muted">A global index can also be chosen in Create table. This adds one to the existing table. Items already stored are copied into it, which can take a while. A local secondary index can only be chosen while creating the table.</p>
           <label className="field">
             <span>Index name</span>
             <input value={indexName} onChange={(event) => setIndexName(event.target.value)} />

@@ -119,6 +119,21 @@ export function createDispatcher(host: Host, services: ServiceFactory): (method:
               nonKeyAttributes: Array.isArray(nonKey) ? nonKey.filter((name): name is string => typeof name === "string") : undefined,
             };
           }) : undefined;
+          const globalIndexes = Array.isArray(obj.globalIndexes) ? obj.globalIndexes.map((item) => {
+            const index = asObject(item);
+            const indexPartition = asObject(index.partitionKey);
+            const indexSort = index.sortKey ? asObject(index.sortKey) : undefined;
+            const nonKey = index.nonKeyAttributes;
+            return {
+              indexName: reqString(index, "indexName"),
+              partitionKey: { name: reqString(indexPartition, "name"), type: reqString(indexPartition, "type") as "S" | "N" | "B" },
+              sortKey: indexSort
+                ? { name: reqString(indexSort, "name"), type: reqString(indexSort, "type") as "S" | "N" | "B" }
+                : undefined,
+              projection: reqString(index, "projection") as "ALL" | "KEYS_ONLY" | "INCLUDE",
+              nonKeyAttributes: Array.isArray(nonKey) ? nonKey.filter((name): name is string => typeof name === "string") : undefined,
+            };
+          }) : undefined;
           return (await client(reqString(obj, "connectionId"))).createTable({
             tableName: reqString(obj, "tableName"),
             partitionKey: { name: reqString(partitionKey, "name"), type: reqString(partitionKey, "type") as "S" | "N" | "B" },
@@ -126,6 +141,7 @@ export function createDispatcher(host: Host, services: ServiceFactory): (method:
               ? { name: reqString(sort, "name"), type: reqString(sort, "type") as "S" | "N" | "B" }
               : undefined,
             localIndexes,
+            globalIndexes,
           });
         }
         case "tables.createIndex": {

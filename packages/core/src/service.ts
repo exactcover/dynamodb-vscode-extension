@@ -192,41 +192,70 @@ export class DynamoService implements DynamoApi {
     const tableSort = input.sortKey ? definitions[1]?.AttributeName : undefined;
     if (tableSort) usedAttributes.add(tableSort);
     const usedIndexNames = new Set<string>();
-    const localSecondaryIndexes = localIndexes.map((index) => {
-      const indexName = index.indexName.trim();
+    const claimIndexName = (raw: string): string => {
+      const indexName = raw.trim();
       if (!/^[A-Za-z0-9_.-]{3,255}$/.test(indexName)) {
         throw new Error("Index names are 3–255 characters: letters, numbers, underscore, hyphen, or dot.");
       }
       if (usedIndexNames.has(indexName)) throw new Error(`Index "${indexName}" is already used.`);
       usedIndexNames.add(indexName);
-      const sortName = assertAttributeName(index.sortKey.name, "Local index sort key");
-      const sortType = keyType(index.sortKey.type);
-      if (usedAttributes.has(sortName)) throw new Error(`"${sortName}" is already a key.`);
-      usedAttributes.add(sortName);
-      const existing = definitions.find((item) => item.AttributeName === sortName);
-      if (existing && existing.AttributeType !== sortType) {
-        throw new Error(`"${sortName}" is already defined as ${typeLabel(existing.AttributeType)}.`);
+      return indexName;
+    };
+    const defineAttribute = (name: string, type: string, label: string): string => {
+      const attribute = assertAttributeName(name, label);
+      const wanted = keyType(type);
+      const existing = definitions.find((item) => item.AttributeName === attribute);
+      if (existing && existing.AttributeType !== wanted) {
+        throw new Error(`"${attribute}" is already defined as ${typeLabel(existing.AttributeType)}.`);
       }
-      if (!existing) definitions.push({ AttributeName: sortName, AttributeType: sortType });
-      const projection = index.projection;
+      if (!existing) definitions.push({ AttributeName: attribute, AttributeType: wanted });
+      return attribute;
+    };
+    const projectionSpec = (projection: string, names: string[] | undefined) => {
       if (projection !== "ALL" && projection !== "KEYS_ONLY" && projection !== "INCLUDE") {
         throw new Error("Projection must be all attributes, keys only, or include.");
       }
       const nonKey = projection === "INCLUDE"
-        ? (index.nonKeyAttributes ?? []).map((name) => assertAttributeName(name, "Projected attribute"))
+        ? (names ?? []).map((name) => assertAttributeName(name, "Projected attribute"))
         : undefined;
       if (projection === "INCLUDE" && (!nonKey || nonKey.length === 0)) {
         throw new Error("Include projection needs at least one attribute name.");
       }
+      return projection === "INCLUDE"
+        ? { ProjectionType: projection as "INCLUDE", NonKeyAttributes: nonKey }
+        : { ProjectionType: projection as "ALL" | "KEYS_ONLY" };
+    };
+    const localSecondaryIndexes = localIndexes.map((index) => {
+      const indexName = claimIndexName(index.indexName);
+      const sortName = defineAttribute(index.sortKey.name, index.sortKey.type, "Local index sort key");
+      if (usedAttributes.has(sortName)) throw new Error(`"${sortName}" is already a key.`);
+      usedAttributes.add(sortName);
       return {
         IndexName: indexName,
         KeySchema: [
           { AttributeName: partitionName, KeyType: "HASH" as const },
           { AttributeName: sortName, KeyType: "RANGE" as const },
         ],
-        Projection: projection === "INCLUDE"
-          ? { ProjectionType: projection, NonKeyAttributes: nonKey }
-          : { ProjectionType: projection },
+        Projection: projectionSpec(index.projection, index.nonKeyAttributes),
+      };
+    });
+    const globalIndexes = input.globalIndexes ?? [];
+    if (globalIndexes.length > 20) throw new Error("A table can have at most 20 global indexes.");
+    const globalSecondaryIndexes = globalIndexes.map((index) => {
+      const indexName = claimIndexName(index.indexName);
+      const hashName = defineAttribute(index.partitionKey.name, index.partitionKey.type, "Global index partition key");
+      const indexKey: { AttributeName: string; KeyType: "HASH" | "RANGE" }[] = [
+        { AttributeName: hashName, KeyType: "HASH" },
+      ];
+      if (index.sortKey) {
+        const sortName = defineAttribute(index.sortKey.name, index.sortKey.type, "Global index sort key");
+        if (sortName === hashName) throw new Error("Partition key and sort key must be different attributes.");
+        indexKey.push({ AttributeName: sortName, KeyType: "RANGE" });
+      }
+      return {
+        IndexName: indexName,
+        KeySchema: indexKey,
+        Projection: projectionSpec(index.projection, index.nonKeyAttributes),
       };
     });
     await this.client.send(
@@ -235,6 +264,7 @@ export class DynamoService implements DynamoApi {
         AttributeDefinitions: definitions,
         KeySchema: keySchema,
         LocalSecondaryIndexes: localSecondaryIndexes.length > 0 ? localSecondaryIndexes : undefined,
+        GlobalSecondaryIndexes: globalSecondaryIndexes.length > 0 ? globalSecondaryIndexes : undefined,
         BillingMode: "PAY_PER_REQUEST",
       }),
     );
