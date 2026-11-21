@@ -108,12 +108,24 @@ export function createDispatcher(host: Host, services: ServiceFactory): (method:
           const obj = asObject(params);
           const partitionKey = asObject(obj.partitionKey);
           const sort = obj.sortKey ? asObject(obj.sortKey) : undefined;
+          const localIndexes = Array.isArray(obj.localIndexes) ? obj.localIndexes.map((item) => {
+            const index = asObject(item);
+            const indexSort = asObject(index.sortKey);
+            const nonKey = index.nonKeyAttributes;
+            return {
+              indexName: reqString(index, "indexName"),
+              sortKey: { name: reqString(indexSort, "name"), type: reqString(indexSort, "type") as "S" | "N" | "B" },
+              projection: reqString(index, "projection") as "ALL" | "KEYS_ONLY" | "INCLUDE",
+              nonKeyAttributes: Array.isArray(nonKey) ? nonKey.filter((name): name is string => typeof name === "string") : undefined,
+            };
+          }) : undefined;
           return (await client(reqString(obj, "connectionId"))).createTable({
             tableName: reqString(obj, "tableName"),
             partitionKey: { name: reqString(partitionKey, "name"), type: reqString(partitionKey, "type") as "S" | "N" | "B" },
             sortKey: sort
               ? { name: reqString(sort, "name"), type: reqString(sort, "type") as "S" | "N" | "B" }
               : undefined,
+            localIndexes,
           });
         }
         case "tables.createIndex": {

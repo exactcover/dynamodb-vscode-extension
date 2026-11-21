@@ -125,5 +125,5 @@ The tests cover JSON conversion, query expressions, and saved connections. They 
 
 - Page size is 1–200 items. A filtered scan keeps reading until it fills the page, stops after about 25 rounds, or reaches the end. Choose **Load more** or **Keep scanning** to continue.
 - Import accepts up to 200 items and 5 MB.
-- Create Table builds an on-demand table with a partition key and an optional sort key. Definition shows the keys and indexes. Add index creates a global secondary index. A local secondary index has to be created with the table.
+- Create Table builds an on-demand table with a partition key, an optional sort key, and up to five local secondary indexes when the table has a sort key. Definition shows the keys and indexes. Add index creates a global secondary index. A local secondary index cannot be added later.
 - Global secondary indexes are eventually consistent. The consistent-read checkbox is disabled for them.

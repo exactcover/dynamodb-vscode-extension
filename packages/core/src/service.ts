@@ -183,11 +183,58 @@ export class DynamoService implements DynamoApi {
       definitions.push({ AttributeName: sortName, AttributeType: keyType(input.sortKey.type) });
       keySchema.push({ AttributeName: sortName, KeyType: "RANGE" });
     }
+    const localIndexes = input.localIndexes ?? [];
+    if (localIndexes.length > 0 && !input.sortKey) {
+      throw new Error("A local index needs a sort key on the table.");
+    }
+    if (localIndexes.length > 5) throw new Error("A table can have at most 5 local indexes.");
+    const usedAttributes = new Set<string>([partitionName]);
+    const tableSort = input.sortKey ? definitions[1]?.AttributeName : undefined;
+    if (tableSort) usedAttributes.add(tableSort);
+    const usedIndexNames = new Set<string>();
+    const localSecondaryIndexes = localIndexes.map((index) => {
+      const indexName = index.indexName.trim();
+      if (!/^[A-Za-z0-9_.-]{3,255}$/.test(indexName)) {
+        throw new Error("Index names are 3–255 characters: letters, numbers, underscore, hyphen, or dot.");
+      }
+      if (usedIndexNames.has(indexName)) throw new Error(`Index "${indexName}" is already used.`);
+      usedIndexNames.add(indexName);
+      const sortName = assertAttributeName(index.sortKey.name, "Local index sort key");
+      const sortType = keyType(index.sortKey.type);
+      if (usedAttributes.has(sortName)) throw new Error(`"${sortName}" is already a key.`);
+      usedAttributes.add(sortName);
+      const existing = definitions.find((item) => item.AttributeName === sortName);
+      if (existing && existing.AttributeType !== sortType) {
+        throw new Error(`"${sortName}" is already defined as ${typeLabel(existing.AttributeType)}.`);
+      }
+      if (!existing) definitions.push({ AttributeName: sortName, AttributeType: sortType });
+      const projection = index.projection;
+      if (projection !== "ALL" && projection !== "KEYS_ONLY" && projection !== "INCLUDE") {
+        throw new Error("Projection must be all attributes, keys only, or include.");
+      }
+      const nonKey = projection === "INCLUDE"
+        ? (index.nonKeyAttributes ?? []).map((name) => assertAttributeName(name, "Projected attribute"))
+        : undefined;
+      if (projection === "INCLUDE" && (!nonKey || nonKey.length === 0)) {
+        throw new Error("Include projection needs at least one attribute name.");
+      }
+      return {
+        IndexName: indexName,
+        KeySchema: [
+          { AttributeName: partitionName, KeyType: "HASH" as const },
+          { AttributeName: sortName, KeyType: "RANGE" as const },
+        ],
+        Projection: projection === "INCLUDE"
+          ? { ProjectionType: projection, NonKeyAttributes: nonKey }
+          : { ProjectionType: projection },
+      };
+    });
     await this.client.send(
       new CreateTableCommand({
         TableName: tableName,
         AttributeDefinitions: definitions,
         KeySchema: keySchema,
+        LocalSecondaryIndexes: localSecondaryIndexes.length > 0 ? localSecondaryIndexes : undefined,
         BillingMode: "PAY_PER_REQUEST",
       }),
     );

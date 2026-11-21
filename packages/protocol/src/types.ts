@@ -129,10 +129,18 @@ export interface DeleteItemInput {
   key: Record<string, unknown>;
 }
 
+export interface LocalIndexInput {
+  indexName: string;
+  sortKey: { name: string; type: KeyAttributeType };
+  projection: "ALL" | "KEYS_ONLY" | "INCLUDE";
+  nonKeyAttributes?: string[];
+}
+
 export interface CreateTableInput {
   tableName: string;
   partitionKey: { name: string; type: KeyAttributeType };
   sortKey?: { name: string; type: KeyAttributeType };
+  localIndexes?: LocalIndexInput[];
 }
 
 export interface CreateIndexInput {

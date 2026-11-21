@@ -12,6 +12,7 @@ export type {
   IndexDescription,
   ItemPage,
   KeyAttributeType,
+  LocalIndexInput,
   KeySchema,
   PublicConnection,
   PutItemInput,
