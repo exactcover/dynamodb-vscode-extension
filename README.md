@@ -32,7 +32,7 @@ docker run --rm -p 8000:8000 amazon/dynamodb-local
 
 In the client, add a connection named DynamoDB Local, region `us-east-1`, endpoint `http://localhost:8000`.
 
-To seed a sample table with the AWS CLI:
+To seed a sample table:
 
 ```bash
 bash scripts/seed-local.sh
