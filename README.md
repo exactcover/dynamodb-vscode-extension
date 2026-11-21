@@ -2,7 +2,9 @@
 
 A DynamoDB client for VS Code, plus the same client as a desktop app for Linux and macOS. It is meant to replace the slow parts of NoSQL Workbench: connect, list tables, page through items, query keys, search text, and create, edit, or delete items.
 
-The [user guide](docs/user-guide.md) shows both apps and how to use them.
+![DynamoDB Client browsing the Users table](docs/images/app.png)
+
+The desktop app is shown above. The VS Code extension uses the same screen. The [user guide](docs/user-guide.md) walks through both.
 
 ## What you can do
 
