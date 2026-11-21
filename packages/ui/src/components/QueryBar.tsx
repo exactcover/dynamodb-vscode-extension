@@ -35,7 +35,8 @@ export function QueryBar(props: {
   onPartiQL: () => void;
   onImport: () => void;
   onExport: () => void;
-  onDeleteTable: () => void;
+  selectedCount: number;
+  onDeleteSelected: () => void;
 }) {
   const [mode, setMode] = useState<PageRequest["kind"]>("scan");
   const [limit, setLimit] = useState(50);
@@ -55,14 +56,35 @@ export function QueryBar(props: {
   const sort = keys.find((key) => key.role === "RANGE");
   const gsi = index?.type === "GSI";
 
+  function shared() {
+    return { limit, consistentRead: gsi ? false : consistent, indexName: indexName || undefined };
+  }
+
+  function showAll() {
+    if (!props.description) return;
+    props.onRun({ kind: "scan", ...shared() });
+  }
+
+  function runSearch(value = text) {
+    if (!props.description) return;
+    const query = value.trim();
+    if (!query) {
+      showAll();
+      return;
+    }
+    props.onRun({ kind: "search", ...shared(), text: query, attribute: attribute || undefined });
+  }
+
   function run() {
-    const shared = { limit, consistentRead: gsi ? false : consistent, indexName: indexName || undefined };
-    if (mode === "scan") props.onRun({ kind: "scan", ...shared });
-    else if (mode === "search") props.onRun({ kind: "search", ...shared, text, attribute: attribute || undefined });
+    if (mode === "scan" || (mode === "search" && !text.trim())) {
+      showAll();
+      return;
+    }
+    if (mode === "search") runSearch();
     else {
       props.onRun({
         kind: "query",
-        ...shared,
+        ...shared(),
         partitionKeyValue,
         sortKeyOperator: sortKeyOperator || undefined,
         sortKeyValue: sortKeyValue || undefined,
@@ -80,7 +102,16 @@ export function QueryBar(props: {
           ["query", "Query"],
           ["search", "Search"],
         ] as const).map(([id, label]) => (
-          <button key={id} role="tab" aria-selected={mode === id} onClick={() => setMode(id)}>{label}</button>
+          <button
+            key={id}
+            role="tab"
+            aria-selected={mode === id}
+            onClick={() => {
+              setMode(id);
+              if (id === "scan") showAll();
+              if (id === "search") runSearch();
+            }}
+          >{label}</button>
         ))}
       </div>
       {props.description && props.description.indexes.length > 0 ? (
@@ -133,7 +164,11 @@ export function QueryBar(props: {
             <input
               value={text}
               placeholder="Matches top-level strings. Type an attribute to narrow it."
-              onChange={(event) => setText(event.target.value)}
+              onChange={(event) => {
+                const next = event.target.value;
+                setText(next);
+                if (!next.trim() && text.trim()) showAll();
+              }}
               onKeyDown={(event) => { if (event.key === "Enter") run(); }}
             />
           </label>
@@ -164,7 +199,9 @@ export function QueryBar(props: {
       <button className="btn" onClick={props.onPartiQL} disabled={!props.description}>PartiQL</button>
       <button className="btn" onClick={props.onImport} disabled={!props.description}>Import</button>
       <button className="btn" onClick={props.onExport} disabled={!props.description}>Export</button>
-      <button className="btn btn-danger" onClick={props.onDeleteTable} disabled={!props.description}>Delete table</button>
+      {props.selectedCount > 0 ? (
+        <button className="btn btn-danger" onClick={props.onDeleteSelected}>Delete {props.selectedCount}</button>
+      ) : null}
     </div>
   );
 }

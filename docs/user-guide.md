@@ -52,7 +52,7 @@ Select a connection, then a table. **Filter tables** narrows the list. **Refresh
 
 The toolbar has three read modes:
 
-- **Browse** scans the table or the selected index, one page at a time.
+- **Browse** scans the table or the selected index, one page at a time. Click **Browse** to leave a search or query and show every item again. Clearing the search text does the same. Click **Search** again to run the text still in the box.
 - **Query** reads by partition key. If the table or index has a sort key, you can set it to `=`, `begins with`, `<`, `<=`, `>`, `>=`, `between`, or **Any**. **begins with** applies to string sort keys. **Descending** reverses the sort.
 - **Search** finds text in top-level string attributes. Leave **Attribute** blank to search up to eight of those attributes, or type one name to search only that field. This is a scan. It uses read capacity. It is not a full-text index.
 
@@ -77,7 +77,7 @@ The editor uses plain JSON:
 
 If you change the key and save, the editor offers to delete the original after the new item is written.
 
-The **×** on a row deletes that item after you confirm. Check several rows and the header shows **Delete N** for the selection. You can delete up to 100 items at a time. The copy icon puts that item's JSON on the clipboard.
+The **×** on a row deletes that item after you confirm. Check several rows and the toolbar shows **Delete N** next to Export. You can delete up to 100 items at a time. The copy icon puts that item's JSON on the clipboard.
 
 ## Import and export
 
@@ -93,7 +93,7 @@ The **×** on a row deletes that item after you confirm. Check several rows and 
 
 **+** next to Tables opens **Create table**. You set the table name, a partition key, and an optional sort key. Each key is String, Number, or Binary. The table is on-demand. This dialog creates the base table only. Add indexes in AWS. The client can query indexes that already exist.
 
-**Delete table** asks you to type the table name. That deletes the table and every item in it.
+Each table in the sidebar has a trash icon. It asks you to type the table name. That deletes the table and every item in it.
 
 ## Limits
 

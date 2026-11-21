@@ -81,7 +81,7 @@ export function App() {
   const [info, setInfo] = useState<AppInfo>({ encryption: true, platform: "", product: "vscode" });
   const [creatingTable, setCreatingTable] = useState(false);
   const [partiql, setPartiql] = useState(false);
-  const [deleteTableOpen, setDeleteTableOpen] = useState(false);
+  const [tableToDelete, setTableToDelete] = useState<string>();
   const [deleteTableText, setDeleteTableText] = useState("");
   const [confirm, setConfirm] = useState<{ title: string; body: string; confirmLabel: string; danger?: boolean; run: () => Promise<void> }>();
   const pageSeq = useRef(0);
@@ -318,20 +318,6 @@ export function App() {
         <div className="crumb">{connection ? connection.name : "No connection"}{tableName ? ` / ${tableName}` : ""}</div>
         <span className="spacer" />
         <button className="btn" onClick={() => void refreshTables()} disabled={!connectionId || loading}>Refresh</button>
-        {selectedItems.length > 0 ? (
-          <button
-            className="btn btn-danger"
-            onClick={() => setConfirm({
-              title: "Delete items",
-              body: `Delete ${selectedItems.length} selected items from ${tableName}?`,
-              confirmLabel: "Delete",
-              danger: true,
-              run: () => deleteItems(selectedItems),
-            })}
-          >
-            Delete {selectedItems.length}
-          </button>
-        ) : null}
       </header>
       <Sidebar
         connections={connections}
@@ -361,6 +347,7 @@ export function App() {
           },
         })}
         onCreateTable={() => setCreatingTable(true)}
+        onDeleteTable={(name) => { setDeleteTableText(""); setTableToDelete(name); }}
         onRefresh={() => void refreshTables()}
       />
       <main className="main">
@@ -389,7 +376,14 @@ export function App() {
               onPartiQL={() => setPartiql(true)}
               onImport={() => void importItems()}
               onExport={() => void exportItems()}
-              onDeleteTable={() => { setDeleteTableText(""); setDeleteTableOpen(true); }}
+              selectedCount={selectedItems.length}
+              onDeleteSelected={() => setConfirm({
+                title: "Delete items",
+                body: `Delete ${selectedItems.length} selected items from ${tableName}?`,
+                confirmLabel: "Delete",
+                danger: true,
+                run: () => deleteItems(selectedItems),
+              })}
             />
             {description ? (
               <div className="meta">
@@ -516,19 +510,20 @@ export function App() {
           onRun={(statement, parameters, nextToken) => api.execute(connectionId, statement, parameters, nextToken)}
         />
       ) : null}
-      {deleteTableOpen && tableName && connectionId ? (
+      {tableToDelete && connectionId ? (
         <DeleteTablePrompt
-          tableName={tableName}
+          tableName={tableToDelete}
           text={deleteTableText}
           onText={setDeleteTableText}
           busy={loading}
-          onClose={() => setDeleteTableOpen(false)}
+          onClose={() => setTableToDelete(undefined)}
           onConfirm={async () => {
-            await api.deleteTable(connectionId, tableName);
-            setDeleteTableOpen(false);
-            setTableName(undefined);
+            const removed = tableToDelete;
+            await api.deleteTable(connectionId, removed);
+            setTableToDelete(undefined);
+            if (tableName === removed) setTableName(undefined);
             setTables(await api.listTables(connectionId));
-            flash(`Deleted ${tableName}.`);
+            flash(`Deleted ${removed}.`);
           }}
         />
       ) : null}

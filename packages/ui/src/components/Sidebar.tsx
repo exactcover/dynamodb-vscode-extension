@@ -14,6 +14,7 @@ export function Sidebar(props: {
   onEditConnection: (connection: PublicConnection) => void;
   onDeleteConnection: (connection: PublicConnection) => void;
   onCreateTable: () => void;
+  onDeleteTable: (name: string) => void;
   onRefresh: () => void;
 }) {
   const filtered = props.tables.filter((name) => name.toLowerCase().includes(props.filter.trim().toLowerCase()));
@@ -56,15 +57,34 @@ export function Sidebar(props: {
       <div className="table-list">
         {props.connectionId && filtered.length === 0 ? <div className="muted" style={{ padding: "4px 8px" }}>No tables.</div> : null}
         {filtered.map((name) => (
-          <button
-            key={name}
-            className={name === props.tableName ? "nav-item active" : "nav-item"}
-            onClick={() => props.onSelectTable(name)}
-          >
-            <strong>{name}</strong>
-          </button>
+          <div className="nav-row" key={name}>
+            <button
+              className={name === props.tableName ? "nav-item active" : "nav-item"}
+              onClick={() => props.onSelectTable(name)}
+            >
+              <strong>{name}</strong>
+            </button>
+            <button
+              className="icon-btn danger"
+              aria-label={`Delete table ${name}`}
+              title="Delete table"
+              onClick={() => props.onDeleteTable(name)}
+            >
+              <TrashIcon />
+            </button>
+          </div>
         ))}
       </div>
     </aside>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 7h16" />
+      <path d="M9 7V5h6v2" />
+      <path d="M7 7l1 13h8l1-13" />
+    </svg>
   );
 }
