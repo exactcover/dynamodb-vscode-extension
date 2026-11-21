@@ -35,13 +35,14 @@ A new connection starts as DynamoDB Local at `http://localhost:8000`. Switching 
 
 Region defaults to `us-east-1`. An endpoint on an AWS connection sends that account's calls to LocalStack or a VPC endpoint.
 
-Start DynamoDB Local with Docker, then add the connection:
+From this repo, start DynamoDB Local and load the sample `Users` table:
 
 ```bash
-docker run --rm -p 8000:8000 amazon/dynamodb-local
+bun run db:start
+bun run db:seed
 ```
 
-`bash scripts/seed-local.sh` creates the `Users` table shown in the pictures.
+`bun run db:stop` stops it and keeps the data. `bun run db:restart` starts it again. `bun run db:clean` deletes every local table, and `bun run db:reset` cleans and seeds again.
 
 Access keys stay in VS Code Secret Storage, or in the operating system keychain for the desktop app. If the desktop machine has no secret store, the app says so and writes them to a private file. That file is not strong protection.
 

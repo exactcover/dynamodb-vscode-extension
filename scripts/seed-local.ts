@@ -1,4 +1,12 @@
-import { CreateTableCommand, DynamoDBClient, PutItemCommand, ResourceInUseException } from "@aws-sdk/client-dynamodb";
+import {
+  CreateTableCommand,
+  DeleteItemCommand,
+  DynamoDBClient,
+  PutItemCommand,
+  ResourceInUseException,
+  ResourceNotFoundException,
+  type AttributeValue,
+} from "@aws-sdk/client-dynamodb";
 
 const endpoint = process.env.DYNAMODB_ENDPOINT ?? "http://localhost:8000";
 const client = new DynamoDBClient({
@@ -29,31 +37,49 @@ try {
   if (!(err instanceof ResourceInUseException)) throw err;
 }
 
-await client.send(
-  new PutItemCommand({
-    TableName: "Users",
-    Item: {
-      pk: { S: "user" },
-      sk: { S: "ada" },
-      name: { S: "Ada Lovelace" },
-      email: { S: "ada@example.com" },
-      roles: { SS: ["admin", "dev"] },
-    },
-  }),
-);
+const users: Record<string, AttributeValue>[] = [
+  {
+    pk: { S: "user" },
+    sk: { S: "vishal" },
+    name: { S: "Vishal Kumar Gupta" },
+    email: { S: "vishal@example.com" },
+    roles: { SS: ["admin", "dev"] },
+    active: { BOOL: true },
+  },
+  {
+    pk: { S: "user" },
+    sk: { S: "john" },
+    name: { S: "John Doe" },
+    email: { S: "john.doe@example.com" },
+    roles: { SS: ["dev"] },
+    active: { BOOL: true },
+  },
+  {
+    pk: { S: "user" },
+    sk: { S: "jane" },
+    name: { S: "Jane Doe" },
+    email: { S: "jane.doe@example.com" },
+    roles: { SS: ["reader"] },
+    active: { BOOL: false },
+  },
+];
 
-await client.send(
-  new PutItemCommand({
-    TableName: "Users",
-    Item: {
-      pk: { S: "user" },
-      sk: { S: "grace" },
-      name: { S: "Grace Hopper" },
-      email: { S: "grace@example.com" },
-      active: { BOOL: true },
-    },
-  }),
-);
+for (const item of users) {
+  await client.send(new PutItemCommand({ TableName: "Users", Item: item }));
+}
+
+for (const sk of ["ada", "grace"]) {
+  try {
+    await client.send(
+      new DeleteItemCommand({
+        TableName: "Users",
+        Key: { pk: { S: "user" }, sk: { S: sk } },
+      }),
+    );
+  } catch (err) {
+    if (!(err instanceof ResourceNotFoundException)) throw err;
+  }
+}
 
 client.destroy();
 console.log(`Seeded Users at ${endpoint}`);

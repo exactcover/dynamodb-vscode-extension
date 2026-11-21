@@ -28,17 +28,21 @@ Text search is a DynamoDB scan, not a full-text index. It reads capacity. Type a
 
 ## Run DynamoDB Local
 
+These scripts use Docker and keep the database in a `dynamodb-local-data` volume, so stopping the container does not wipe tables.
+
 ```bash
-docker run --rm -p 8000:8000 amazon/dynamodb-local
+bun run db:start
+bun run db:seed
+bun run db:status
+bun run db:stop
+bun run db:restart
+bun run db:clean
+bun run db:reset
 ```
+
+`db:seed` writes the sample `Users` table. `db:clean` deletes every table on `localhost`. `db:reset` cleans, then seeds again. `db:logs` prints the container log.
 
 In the client, add a connection named DynamoDB Local, region `us-east-1`, endpoint `http://localhost:8000`.
-
-To seed a sample table:
-
-```bash
-bash scripts/seed-local.sh
-```
 
 You can also create the table from the client.
 
