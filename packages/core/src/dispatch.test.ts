@@ -33,6 +33,7 @@ function stubService(tables: string[]): DynamoApi {
     listTables: async () => tables,
     describeTable: async () => description,
     createTable: async () => description,
+    createIndex: async () => description,
     deleteTable: async () => undefined,
     getItem: async () => ({ pk: "a" }),
     putItem: async () => undefined,

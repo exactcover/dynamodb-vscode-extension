@@ -1,5 +1,6 @@
 import type {
   ConnectionInput,
+  CreateIndexInput,
   CreateTableInput,
   ImportItemsResult,
   ItemPage,
@@ -30,6 +31,8 @@ export function createApi(transport: Transport) {
       call<TableDescription>("tables.describe", { connectionId, tableName, force }),
     createTable: (connectionId: string, input: CreateTableInput) =>
       call<TableDescription>("tables.create", { connectionId, ...input }),
+    createIndex: (connectionId: string, input: CreateIndexInput) =>
+      call<TableDescription>("tables.createIndex", { connectionId, ...input }),
     deleteTable: (connectionId: string, tableName: string) => call<{ ok: boolean }>("tables.delete", { connectionId, tableName }),
     scan: (params: { connectionId: string } & ScanItemsInput) => call<ItemPage>("items.scan", params),
     query: (params: { connectionId: string } & QueryItemsInput) => call<ItemPage>("items.query", params),

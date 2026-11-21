@@ -4,6 +4,7 @@ import { createApi, type Api, type AppInfo } from "./api";
 import { ConfirmDialog, Dialog } from "./components/Dialog";
 import { ConnectionDialog } from "./components/ConnectionDialog";
 import { CreateTableDialog } from "./components/CreateTableDialog";
+import { TableDefinitionDialog } from "./components/TableDefinitionDialog";
 import { DataGrid } from "./components/DataGrid";
 import { ItemDrawer } from "./components/ItemDrawer";
 import { PartiQLDialog } from "./components/PartiQLDialog";
@@ -80,6 +81,7 @@ export function App() {
   const [profiles, setProfiles] = useState<string[]>([]);
   const [info, setInfo] = useState<AppInfo>({ encryption: true, platform: "", product: "vscode" });
   const [creatingTable, setCreatingTable] = useState(false);
+  const [definitionOpen, setDefinitionOpen] = useState(false);
   const [partiql, setPartiql] = useState(false);
   const [tableToDelete, setTableToDelete] = useState<string>();
   const [deleteTableText, setDeleteTableText] = useState("");
@@ -393,6 +395,7 @@ export function App() {
                 {description.itemCount !== undefined ? <span>~{description.itemCount} items</span> : null}
                 {description.sizeBytes !== undefined ? <span>{formatBytes(description.sizeBytes)}</span> : null}
                 {description.indexes.length > 0 ? <span>{description.indexes.map((index) => index.name).join(", ")}</span> : null}
+                <button className="btn" onClick={() => setDefinitionOpen(true)}>Definition</button>
               </div>
             ) : null}
             {page.items.length === 0 && !loading ? (
@@ -499,6 +502,19 @@ export function App() {
             setTables(names);
             setTableName(created.name);
             flash(`Created ${created.name}.`);
+          }}
+        />
+      ) : null}
+      {definitionOpen && description && connectionId ? (
+        <TableDefinitionDialog
+          description={description}
+          busy={loading}
+          onClose={() => setDefinitionOpen(false)}
+          onCreateIndex={async (input) => {
+            const described = await api.createIndex(connectionId, input);
+            setDescription(described);
+            const created = described.indexes.find((index) => index.name === input.indexName.trim());
+            flash(created?.status === "CREATING" ? `${input.indexName.trim()} is creating.` : `Added ${input.indexName.trim()}.`);
           }}
         />
       ) : null}

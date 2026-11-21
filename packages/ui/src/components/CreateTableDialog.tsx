@@ -40,7 +40,7 @@ export function CreateTableDialog(props: {
       }
     >
       <div className="stack">
-        <p className="muted" style={{ margin: 0 }}>On-demand billing. Add indexes later in AWS if you need them. This dialog creates the base table only.</p>
+        <p className="muted" style={{ margin: 0 }}>On-demand billing. A global secondary index can be added later from Definition. A local secondary index has to be created with the table in AWS.</p>
         <label className="field">
           <span>Table name</span>
           <input value={tableName} onChange={(event) => setTableName(event.target.value)} />

@@ -1,4 +1,5 @@
 import type {
+  CreateIndexInput,
   CreateTableInput,
   DeleteItemInput,
   GetItemInput,
@@ -18,6 +19,7 @@ export interface DynamoApi {
   listTables(): Promise<string[]>;
   describeTable(tableName: string, force?: boolean): Promise<TableDescription>;
   createTable(input: CreateTableInput): Promise<TableDescription>;
+  createIndex(input: CreateIndexInput): Promise<TableDescription>;
   deleteTable(tableName: string): Promise<void>;
   getItem(input: GetItemInput): Promise<Record<string, unknown> | null>;
   putItem(input: PutItemInput): Promise<void>;

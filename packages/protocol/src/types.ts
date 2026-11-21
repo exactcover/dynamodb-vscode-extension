@@ -135,6 +135,17 @@ export interface CreateTableInput {
   sortKey?: { name: string; type: KeyAttributeType };
 }
 
+export interface CreateIndexInput {
+  tableName: string;
+  indexName: string;
+  partitionKey: { name: string; type: KeyAttributeType };
+  sortKey?: { name: string; type: KeyAttributeType };
+  projection: "ALL" | "KEYS_ONLY" | "INCLUDE";
+  nonKeyAttributes?: string[];
+  readCapacity?: number;
+  writeCapacity?: number;
+}
+
 export interface ImportItemsInput {
   tableName: string;
   items: Record<string, unknown>[];

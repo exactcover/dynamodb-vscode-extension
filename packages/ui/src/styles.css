@@ -196,14 +196,29 @@ input, select, textarea {
 .meta {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 8px 14px;
-  padding: 8px 12px;
+  padding: 6px 12px;
   color: var(--muted);
   font-family: var(--mono);
   font-size: 12px;
   border-bottom: 1px solid var(--border);
 }
 .meta b { color: var(--fg); font-weight: 600; }
+.meta .btn {
+  height: 22px;
+  margin-left: auto;
+  padding: 0 8px;
+  font-family: var(--font);
+  font-size: 12px;
+  background: transparent;
+}
+.facts { display: grid; grid-template-columns: 110px 1fr; gap: 6px 12px; margin: 0; }
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; }
+.modal h3 { margin: 8px 0 4px; font-size: 13px; }
+.key-list { margin: 4px 0 0; padding-left: 18px; }
+.key-list b { font-weight: 600; }
 
 .grid-wrap { flex: 1; overflow: auto; min-height: 0; }
 table.data { border-collapse: separate; border-spacing: 0; width: max-content; min-width: 100%; }

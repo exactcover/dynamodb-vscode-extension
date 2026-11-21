@@ -1,6 +1,7 @@
 import {
   CreateTableCommand,
   DeleteItemCommand,
+  UpdateTableCommand,
   DeleteTableCommand,
   DescribeTableCommand,
   DynamoDBClient,
@@ -29,6 +30,7 @@ import {
   toAttributeValue,
   type AttributeValueLike,
   type ClientConfig,
+  type CreateIndexInput,
   type CreateTableInput,
   type DeleteItemInput,
   type GetItemInput,
@@ -202,6 +204,91 @@ export class DynamoService implements DynamoApi {
     }
     if (described) return described;
     throw new Error("Table creation was accepted, but the table is not visible yet. Refresh in a moment.");
+  }
+
+  async createIndex(input: CreateIndexInput): Promise<TableDescription> {
+    const tableName = assertTableName(input.tableName);
+    const indexName = input.indexName.trim();
+    if (!/^[A-Za-z0-9_.-]{3,255}$/.test(indexName)) {
+      throw new Error("Index names are 3–255 characters: letters, numbers, underscore, hyphen, or dot.");
+    }
+    const current = await this.describeTable(tableName, true);
+    if (current.indexes.some((index) => index.name === indexName)) {
+      throw new Error(`Index "${indexName}" already exists.`);
+    }
+    if (current.indexes.some((index) => index.status === "CREATING")) {
+      throw new Error("Wait until the index that is still creating becomes active.");
+    }
+    const projection = input.projection;
+    if (projection !== "ALL" && projection !== "KEYS_ONLY" && projection !== "INCLUDE") {
+      throw new Error("Projection must be all attributes, keys only, or include.");
+    }
+    const partitionName = assertAttributeName(input.partitionKey.name, "Partition key");
+    const wanted = new Map<string, KeyAttributeType>([[partitionName, keyType(input.partitionKey.type)]]);
+    const keySchema: { AttributeName: string; KeyType: "HASH" | "RANGE" }[] = [
+      { AttributeName: partitionName, KeyType: "HASH" },
+    ];
+    if (input.sortKey) {
+      const sortName = assertAttributeName(input.sortKey.name, "Sort key");
+      if (sortName === partitionName) throw new Error("Partition key and sort key must be different attributes.");
+      wanted.set(sortName, keyType(input.sortKey.type));
+      keySchema.push({ AttributeName: sortName, KeyType: "RANGE" });
+    }
+    const existing = new Map<string, KeyAttributeType>();
+    for (const key of current.keys) existing.set(key.name, key.type);
+    for (const index of current.indexes) {
+      for (const key of index.keys) existing.set(key.name, key.type);
+    }
+    const definitions: { AttributeName: string; AttributeType: KeyAttributeType }[] = [];
+    for (const [name, type] of wanted) {
+      const already = existing.get(name);
+      if (already && already !== type) {
+        throw new Error(`"${name}" is already defined as ${typeLabel(already)}.`);
+      }
+      if (!already) definitions.push({ AttributeName: name, AttributeType: type });
+    }
+    const nonKey = projection === "INCLUDE"
+      ? (input.nonKeyAttributes ?? []).map((name) => assertAttributeName(name, "Projected attribute"))
+      : undefined;
+    if (projection === "INCLUDE" && (!nonKey || nonKey.length === 0)) {
+      throw new Error("Include projection needs at least one attribute name.");
+    }
+    const provisioned = current.billingMode === "PROVISIONED";
+    let throughput: { ReadCapacityUnits: number; WriteCapacityUnits: number } | undefined;
+    if (provisioned) {
+      const read = input.readCapacity;
+      const write = input.writeCapacity;
+      if (!read || !write || read < 1 || write < 1) {
+        throw new Error("This table uses provisioned capacity. Enter read and write capacity for the index.");
+      }
+      throughput = { ReadCapacityUnits: Math.floor(read), WriteCapacityUnits: Math.floor(write) };
+    }
+    await this.client.send(
+      new UpdateTableCommand({
+        TableName: tableName,
+        AttributeDefinitions: definitions.length > 0 ? definitions : undefined,
+        GlobalSecondaryIndexUpdates: [
+          {
+            Create: {
+              IndexName: indexName,
+              KeySchema: keySchema,
+              Projection: { ProjectionType: projection, NonKeyAttributes: nonKey },
+              ProvisionedThroughput: throughput,
+            },
+          },
+        ],
+      }),
+    );
+    this.descriptions.delete(tableName);
+    const deadline = Date.now() + 20_000;
+    let described = await this.describeTable(tableName, true);
+    while (Date.now() < deadline) {
+      const created = described.indexes.find((index) => index.name === indexName);
+      if (created && created.status !== "CREATING") return described;
+      await sleep(500);
+      described = await this.describeTable(tableName, true);
+    }
+    return described;
   }
 
   async deleteTable(tableName: string): Promise<void> {
@@ -421,6 +508,12 @@ export class DynamoService implements DynamoApi {
     }
     return [...found].toSorted();
   }
+}
+
+function typeLabel(type: KeyAttributeType): string {
+  if (type === "S") return "String";
+  if (type === "N") return "Number";
+  return "Binary";
 }
 
 function keyType(type: string): KeyAttributeType {

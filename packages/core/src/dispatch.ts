@@ -116,6 +116,24 @@ export function createDispatcher(host: Host, services: ServiceFactory): (method:
               : undefined,
           });
         }
+        case "tables.createIndex": {
+          const obj = asObject(params);
+          const partitionKey = asObject(obj.partitionKey);
+          const sort = obj.sortKey ? asObject(obj.sortKey) : undefined;
+          const nonKey = obj.nonKeyAttributes;
+          return (await client(reqString(obj, "connectionId"))).createIndex({
+            tableName: reqString(obj, "tableName"),
+            indexName: reqString(obj, "indexName"),
+            partitionKey: { name: reqString(partitionKey, "name"), type: reqString(partitionKey, "type") as "S" | "N" | "B" },
+            sortKey: sort
+              ? { name: reqString(sort, "name"), type: reqString(sort, "type") as "S" | "N" | "B" }
+              : undefined,
+            projection: reqString(obj, "projection") as "ALL" | "KEYS_ONLY" | "INCLUDE",
+            nonKeyAttributes: Array.isArray(nonKey) ? nonKey.filter((item): item is string => typeof item === "string") : undefined,
+            readCapacity: typeof obj.readCapacity === "number" ? obj.readCapacity : undefined,
+            writeCapacity: typeof obj.writeCapacity === "number" ? obj.writeCapacity : undefined,
+          });
+        }
         case "tables.delete": {
           const obj = asObject(params);
           await (await client(reqString(obj, "connectionId"))).deleteTable(reqString(obj, "tableName"));

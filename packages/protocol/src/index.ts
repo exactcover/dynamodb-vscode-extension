@@ -3,6 +3,7 @@ export type {
   ClientConfig,
   ConnectionInput,
   ConnectionMode,
+  CreateIndexInput,
   CreateTableInput,
   DeleteItemInput,
   GetItemInput,
