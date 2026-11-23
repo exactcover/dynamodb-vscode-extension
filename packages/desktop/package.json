@@ -4,6 +4,7 @@
   "private": true,
   "author": "DynamoDB Client",
   "description": "Desktop DynamoDB client for macOS and Linux.",
+  "homepage": "https://github.com/exactcover/dynamodb-vscode-extension",
   "main": "dist/main.js",
   "scripts": {
     "build": "node esbuild.mjs",
@@ -15,7 +16,7 @@
     "@dynamodb-client/core": "workspace:*"
   },
   "devDependencies": {
-    "electron": "^45.4.1",
+    "electron": "45.4.1",
     "electron-builder": "^26.18.0",
     "esbuild": "^0.28.2",
     "typescript": "^7.0.2"

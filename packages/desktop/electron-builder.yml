@@ -7,11 +7,15 @@ files:
   - package.json
 asar: true
 linux:
+  executableName: dynamodb-client
   target:
     - AppImage
     - deb
   category: Development
   maintainer: DynamoDB Client
+deb:
+  packageName: dynamodb-client
+  artifactName: dynamodb-client_${version}_${arch}.${ext}
 mac:
   target:
     - zip
