@@ -22,7 +22,7 @@ export function validateConnectionInput(input: ConnectionInput): void {
   if (!input || typeof input !== "object") throw new Error("Connection is required.");
   if (!input.name?.trim()) throw new Error("Connection name is required.");
   if (!input.region?.trim() || !REGION.test(input.region.trim())) {
-    throw new Error("Region is required, for example us-east-1.");
+    throw new Error("Region is required, for example eu-west-1.");
   }
   if (!MODES.has(input.mode)) throw new Error("Unknown connection mode.");
   const endpoint = input.endpoint?.trim();

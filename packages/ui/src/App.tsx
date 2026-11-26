@@ -75,7 +75,7 @@ export function App() {
   const [notice, setNotice] = useState<string>();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [editor, setEditor] = useState<{ mode: "create" | "edit"; item: Record<string, unknown> }>();
-  const [connectionDialog, setConnectionDialog] = useState<{ connection?: PublicConnection; presetLocal?: boolean } | undefined>(
+  const [connectionDialog, setConnectionDialog] = useState<{ connection?: PublicConnection } | undefined>(
     boot.addConnection ? {} : undefined,
   );
   const [profiles, setProfiles] = useState<string[]>([]);
@@ -335,7 +335,7 @@ export function App() {
           setConnectionId(id);
         }}
         onSelectTable={setTableName}
-        onAddConnection={() => setConnectionDialog({ presetLocal: connections.length === 0 })}
+        onAddConnection={() => setConnectionDialog({})}
         onEditConnection={(item) => setConnectionDialog({ connection: item })}
         onDeleteConnection={(item) => setConfirm({
           title: "Delete connection",
@@ -358,7 +358,7 @@ export function App() {
           <div className="empty">
             <h2>Connect to DynamoDB</h2>
             <p>Use DynamoDB Local, an AWS profile, access keys, or the same credential chain as the AWS CLI. Then browse, query, edit, and search items.</p>
-            <button className="btn btn-primary" onClick={() => setConnectionDialog({ presetLocal: true })}>Add DynamoDB Local</button>
+            <button className="btn btn-primary" onClick={() => setConnectionDialog({})}>Add connection</button>
           </div>
         ) : !tableName ? (
           <div className="empty">
@@ -475,7 +475,6 @@ export function App() {
       {connectionDialog ? (
         <ConnectionDialog
           initial={connectionDialog.connection}
-          presetLocal={connectionDialog.presetLocal}
           profiles={profiles}
           encryption={info.encryption}
           onClose={() => setConnectionDialog(undefined)}

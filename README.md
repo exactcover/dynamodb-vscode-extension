@@ -8,7 +8,7 @@ The desktop app is shown above. The VS Code extension uses the same screen. The 
 
 ## What you can do
 
-- Connect to DynamoDB Local, an AWS profile (including SSO), access keys, or the default AWS credential chain.
+- Connect with access keys, DynamoDB Local, an AWS profile (including SSO), or the default AWS credential chain. A new connection leaves the name empty, selects Access keys, and sets the region to `eu-west-1`.
 - Optional endpoint for DynamoDB Local or LocalStack.
 - List, create, and delete on-demand tables.
 - Browse items with paging. Query a table or index by partition key and sort key.
@@ -44,7 +44,7 @@ bun run db:reset
 
 `db:seed` writes the sample `Users` table. `db:clean` deletes every table on `localhost`. `db:reset` cleans, then seeds again. `db:logs` prints the container log.
 
-In the client, add a connection named DynamoDB Local, region `us-east-1`, endpoint `http://localhost:8000`.
+In the client, open **Add connection**. The name is empty, the mode is Access keys, and the region is `eu-west-1`. Type a name, switch the mode to DynamoDB Local, and the endpoint fills in as `http://localhost:8000`.
 
 You can also create the table from the client.
 
@@ -72,12 +72,12 @@ Open the DynamoDB icon in the activity bar, or run **DynamoDB: Open Client**.
 
 | Mode | Use it when |
 | --- | --- |
+| Access keys | An access key id and secret. This is the first mode, and the one a new connection selects. Stored in VS Code Secret Storage, not in the workspace. |
 | DynamoDB Local | `http://localhost:8000` or another local endpoint. Any dummy keys work. |
 | AWS profile | A profile in `~/.aws/config`, including SSO. Run `aws sso login --profile name` first. |
-| Access keys | An access key id and secret. Stored in VS Code Secret Storage, not in the workspace. |
 | Default credential chain | The same lookup the AWS CLI uses: env vars, SSO, shared config, then an instance role. |
 
-A custom endpoint on an AWS connection sends that account's calls to LocalStack or a VPC endpoint.
+The name starts empty. The region starts as `eu-west-1`. Choosing DynamoDB Local fills `http://localhost:8000` when the endpoint is blank, and switching away clears that value. A custom endpoint on an AWS connection sends that account's calls to LocalStack or a VPC endpoint.
 
 ## Desktop app
 

@@ -55,7 +55,7 @@ const DESCRIPTION_TTL_MS = 30_000;
 
 export function createDynamoClient(config: ClientConfig): DynamoDBClient {
   const options: DynamoDBClientConfig = {
-    region: config.region || "us-east-1",
+    region: config.region || "eu-west-1",
     maxAttempts: 3,
   };
   if (config.endpoint) options.endpoint = config.endpoint;

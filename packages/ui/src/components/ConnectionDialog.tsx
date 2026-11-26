@@ -3,15 +3,14 @@ import { useState } from "react";
 import { Dialog } from "./Dialog";
 
 const MODES: { id: ConnectionMode; label: string }[] = [
+  { id: "keys", label: "Access keys" },
   { id: "local", label: "DynamoDB Local" },
   { id: "profile", label: "AWS profile" },
-  { id: "keys", label: "Access keys" },
   { id: "default", label: "Default credential chain" },
 ];
 
 export function ConnectionDialog(props: {
   initial?: PublicConnection;
-  presetLocal?: boolean;
   profiles: string[];
   encryption: boolean;
   onClose: () => void;
@@ -19,10 +18,10 @@ export function ConnectionDialog(props: {
   onSave: (input: ConnectionInput) => Promise<void>;
 }) {
   const initial = props.initial;
-  const [name, setName] = useState(initial?.name ?? (props.presetLocal ? "DynamoDB Local" : ""));
-  const [mode, setMode] = useState<ConnectionMode>(initial?.mode ?? "local");
-  const [region, setRegion] = useState(initial?.region ?? "us-east-1");
-  const [endpoint, setEndpoint] = useState(initial?.endpoint ?? (initial ? "" : "http://localhost:8000"));
+  const [name, setName] = useState(initial?.name ?? "");
+  const [mode, setMode] = useState<ConnectionMode>(initial?.mode ?? "keys");
+  const [region, setRegion] = useState(initial?.region ?? "eu-west-1");
+  const [endpoint, setEndpoint] = useState(initial?.endpoint ?? "");
   const [profile, setProfile] = useState(initial?.profile ?? props.profiles[0] ?? "default");
   const [accessKeyId, setAccessKeyId] = useState(initial?.accessKeyId ?? "");
   const [secretAccessKey, setSecretAccessKey] = useState("");

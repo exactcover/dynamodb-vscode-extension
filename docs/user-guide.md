@@ -24,16 +24,16 @@ From a checkout of this repo, `bun run dev:desktop` starts that window. `bun run
 
 Choose **+** next to Connections, or run **DynamoDB: Add Connection** in VS Code. The dialog is **Add connection**. **Test** checks the endpoint before you **Save**. The pencil edits a saved connection. **×** removes it from this app and leaves the AWS tables in place.
 
-A new connection starts as DynamoDB Local at `http://localhost:8000`. Switching away from Local clears that default. Switching back fills it in when the endpoint is blank.
+A new connection starts in Access keys, with an empty name and region `eu-west-1`. That is the mode shown in the dropdown, including from the welcome **Add connection** button. Choosing DynamoDB Local fills `http://localhost:8000` when the endpoint is blank. Switching away from Local clears that default. You type the name before you save.
 
 | Mode | Use it when |
 | --- | --- |
+| Access keys | An access key id and secret. Leave the secret blank when editing to keep the saved one. |
 | DynamoDB Local | A local endpoint, usually `http://localhost:8000`. Any credentials work. |
 | AWS profile | A profile in `~/.aws/config`, including SSO. Sign in with `aws sso login --profile name` first. |
-| Access keys | An access key id and secret. Leave the secret blank when editing to keep the saved one. |
 | Default credential chain | The same lookup as the AWS CLI: environment variables, SSO, shared config, then an instance role. |
 
-Region defaults to `us-east-1`. An endpoint on an AWS connection sends that account's calls to LocalStack or a VPC endpoint.
+Region defaults to `eu-west-1`. An endpoint on an AWS connection sends that account's calls to LocalStack or a VPC endpoint.
 
 From this repo, start DynamoDB Local and load the sample `Users` table:
 
@@ -41,6 +41,8 @@ From this repo, start DynamoDB Local and load the sample `Users` table:
 bun run db:start
 bun run db:seed
 ```
+
+Then add a connection: type a name, choose DynamoDB Local, and keep region `eu-west-1` and endpoint `http://localhost:8000`.
 
 `bun run db:stop` stops it and keeps the data. `bun run db:restart` starts it again. `bun run db:clean` deletes every local table, and `bun run db:reset` cleans and seeds again.
 
